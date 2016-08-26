@@ -86,14 +86,13 @@ def valid_email(email):
     else:
         return ""
 
-def valid_verify(verify):
-    if verify == password:
-        return verify
+def valid_verify(verify, password):
+    return verify == password
 
 
 class SignupHandler(webapp2.RequestHandler):
 #are my passwords supposed to be in write form?
-    def write_form(self, username = "", error_un = "", password = "", error_pwd = "" ),
+    def write_form(self, username = "", error_un = "", password = "", error_pwd = "",
                         verify = "", error_verify = "", email = "", error_email = ""):
         self.response.out.write(signup_form % {"username": escape_html(username),
                                                 "error_un": error_un,
@@ -117,7 +116,7 @@ class SignupHandler(webapp2.RequestHandler):
         un = valid_username(username)
         pwd = valid_password(password)
         el = valid_email(email)
-        vy = valid_verify(verify)
+        vy = valid_verify(verify, password)
 
         error_un = ""
         error_pwd = ""
@@ -133,21 +132,21 @@ class SignupHandler(webapp2.RequestHandler):
         if not el:
             error_email = "That's not a valid email."
 
-        if not(un, and pwd, and verify, and email):
+        if not un and not pwd and not vy and not el:
             self.write_form(username, error_un, "", error_pwd, "", error_verify,
                             email, error_email)
         else:
-            self.redirect('/signup')
-#passwords out of self.write_form?            
+            self.redirect('/welcome')#?username=' + username
+#passwords out of self.write_form?
 
 
 class WelcomeHandler(webapp2.RequestHandler):
-
+    
     def get(self):
-        username = self.request.get("username")
+        username = self.request.get('username')
         self.response.out.write(welcome_form % username)
 
 app = webapp2.WSGIApplication([
-    ('/signup', SignupHandler),
+    ('/', SignupHandler),
     ('/welcome', WelcomeHandler)
 ], debug=True)
