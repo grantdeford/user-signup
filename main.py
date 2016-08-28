@@ -26,7 +26,7 @@ signup_form = """
         </head>
 <body>
     <h2>Signup:</h2>
-    <form method = "POST">
+    <form method = "post">
 
     <label>Username
         <input type = "text" name = "username" value = "%(username)s">
@@ -61,7 +61,7 @@ welcome_form = """
         <title>Welcome Assignment 3(2) LC109WF</title>
             </head>
 <body>
-    <h2>Welcome, %s!</h2>
+    <h2>Welcome, %(username)s!</h2>
     </body>
 </html>
 """
@@ -113,38 +113,40 @@ class SignupHandler(webapp2.RequestHandler):
         verify = self.request.get("verify")
         email = self.request.get("email")
 
-        un = valid_username(username)
-        pwd = valid_password(password)
-        el = valid_email(email)
-        vy = valid_verify(verify, password)
+        user_name = valid_username(username)
+        user_pass = valid_password(password)
+        user_email= valid_email(email)
+        user_verify = valid_verify(verify, password)
 
         error_un = ""
         error_pwd = ""
         error_verify = ""
         error_email = ""
-
-        if not un:
+        #if not user_name and not user_pass and not user_verify and not user_email:
+        if not user_name:
             error_un = "That's not a valid username."
-        if not pwd:
+        if not user_pass:
             error_pwd = "That's not a valid password."
-        elif not vy:
+        elif not user_verify:
             error_verify = "Your passwords didn't match."
-        if not el:
+        if not user_email:
             error_email = "That's not a valid email."
 
-        if not un and not pwd and not vy and not el:
-            self.write_form(username, error_un, "", error_pwd, "", error_verify,
-                            email, error_email)
-        else:
-            self.redirect('/welcome')#?username=' + username
+        if user_name and user_pass and user_verify:
+            self.redirect('/welcome?username=' +str(username))#?username=' + username
 #passwords out of self.write_form?
+        else:
+            self.write_form(username, error_un, password, error_pwd, verify,error_verify,
+                            email, error_email)
+
+
 
 
 class WelcomeHandler(webapp2.RequestHandler):
-    
+
     def get(self):
         username = self.request.get('username')
-        self.response.out.write(welcome_form % username)
+        self.response.out.write(welcome_form % {'username':username})
 
 app = webapp2.WSGIApplication([
     ('/', SignupHandler),
